@@ -1183,7 +1183,7 @@ function renderRsvp(){
   try{ renderHemi(); }catch(e){}
   const t=rsvpTotals(); const objM=Math.min(10,Math.max(1,Math.round(state.mob.mesas||10))); const needSeats=Math.max(t.personas, 1);
   const tile=(val,label,goal,cls)=>{ const pct=goal?Math.min(100,Math.round(val*100/goal)):100; const short=goal&&val<goal; return `<div class="tot${short?" short":""}${goal&&!short?" done":""}${cls?" "+cls:""}"><b>${val}${goal?" / "+goal:""}</b><span>${label}</span>${goal?`<div class="bar"><i style="width:${pct}%"></i></div>`:""}${goal&&!short?`<span class="goal">✓ ¡Objetivo cumplido!</span>`:""}</div>`; };
-  document.getElementById("rsvpTotals").innerHTML = tile(t.personas,"personas apuntadas") + tile(t.mesas,"mesas plegables",objM) + tile(t.asientos,"asientos",SEATS_GOAL) + tile(t.tinto,"botellas de vino tinto",wineGoal("tinto"),"pro-only") + tile(t.blanco,"botellas de vino blanco",wineGoal("branco"),"pro-only");
+  document.getElementById("rsvpTotals").innerHTML = tile(t.personas,"personas apuntadas") + tile(t.mesas,"mesas plegables") + tile(t.asientos,"asientos") + tile(t.tinto,"botellas de vino tinto",wineGoal("tinto"),"pro-only") + tile(t.blanco,"botellas de vino blanco",wineGoal("branco"),"pro-only");
   const list=allRsvps();
   document.getElementById("rList").innerHTML = list.length ? list.map(r=>{ const ps=r.personas||[]; const tags=[r.mesas?r.mesas+" mesa"+(r.mesas>1?"s":""):"", r.sillas?r.sillas+" silla"+(r.sillas>1?"s":""):"", r.bancos?r.bancos+" banco"+(r.bancos>1?"s":""):"", r.tinto?r.tinto+" botella"+(r.tinto>1?"s":"")+" de tinto":"", r.blanco?r.blanco+" botella"+(r.blanco>1?"s":"")+" de blanco":""].filter(Boolean);
     const canDel = mode==="pro" && (r.manual || (DB && !readOnly));
