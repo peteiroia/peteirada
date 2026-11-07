@@ -17,7 +17,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>window.PETEIRADA_FIREBASE = {"apiKey":"AIzaSyC4NSC0OmccfTWYhtx0CA1hTLd-nA58FU4","authDomain":"peteirada.firebaseapp.com","projectId":"peteirada","storageBucket":"peteirada.firebasestorage.app","messagingSenderId":"69304947720","appId":"1:69304947720:web:69d54c0917199898cb2dbd"};</script>
-<script>(function(){ var BUILD="20261107103922";
+<script>(function(){ var BUILD="20261107104031";
   function check(){ try{ fetch("version.txt?t="+Date.now(),{cache:"no-store"}).then(function(r){ return r.ok?r.text():""; }).then(function(v){ v=(v||"").trim(); if(!v||v===BUILD) return; var u=new URL(location.href); if(u.searchParams.get("v")===v) return; u.searchParams.set("v",v); location.replace(u.toString()); }).catch(function(){}); }catch(e){} }
   check(); document.addEventListener("visibilitychange",function(){ if(document.visibilityState==="visible") check(); });
 })();</script>
@@ -897,11 +897,13 @@ const DISHES = [
   ings:[
    {k:"huevo",n:"Huevos",q:4,u:"ud",s:"Huevos"},
    {k:"escabeche",n:"Mejillones en escabeche (lata 115 g)",q:1.2,u:"latas",s:"Pescadería y conservas"},
-   {k:"mayonesa",n:"Mayonesa",q:80,u:"g",s:"Despensa"},
+   {k:"huevomayo",n:"Huevo para la mayonesa",q:0.33,u:"ud",s:"Huevos"},
+   {k:"aceitegirasol",n:"Aceite de girasol (mayonesa)",q:0.07,u:"L",s:"Despensa"},
+   {k:"limon",n:"Limones",q:0.05,u:"ud",s:"Frutería"},
    {k:"cebolleta",n:"Cebolletas",q:0.16,u:"ud",s:"Frutería"},
    {k:"cebollino",n:"Cebollino",q:0.08,u:"manojo",s:"Frutería"},
    {k:"pimdulce",n:"Pimentón dulce",q:1,u:"bote",s:"Despensa",fixed:true}],
-  steps:["Cuece los huevos 10-11 minutos desde que hierva el agua y enfríalos en agua con hielo.","Pélalos, córtalos por la mitad a lo largo y saca las yemas.","Reserva un mejillón por cada mitad. Pica el resto con la cebolleta y mézclalos con las yemas, la mayonesa y un chorrito del escabeche de las latas.","Rellena las claras con manga pastelera.","Justo antes de servir, corona cada mitad con un mejillón, una pizca de pimentón y cebollino picado."],
+  steps:["Cuece los huevos 10-11 minutos desde que hierva el agua y enfríalos en agua con hielo.","Pélalos, córtalos por la mitad a lo largo y saca las yemas.","Haz la mayonesa casera: en el vaso de la batidora pon el huevo, una pizca de sal, unas gotas de limón y el aceite. Mete el brazo hasta el fondo, bate sin moverlo hasta que espese y luego súbelo despacio.","Reserva un mejillón por cada mitad. Pica el resto con la cebolleta y mézclalos con las yemas, la mayonesa casera y un chorrito del escabeche de las latas.","Rellena las claras con manga pastelera.","Justo antes de servir, corona cada mitad con un mejillón, una pizca de pimentón y cebollino picado."],
   tip:"Los huevos con unos días en la nevera se pelan mucho mejor. Cuece y rellena el día antes y pon el mejillón al montar."},
 
  {id:"croissant",c:"entrantes",name:"Croissant relleno de queso crema y salmón",chic:"Mini croissant de mantequilla con salmón ahumado y crema de queso",time:"El mismo día · 30 min",
