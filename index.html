@@ -1273,6 +1273,7 @@ function renderHemi(){
   document.getElementById("hemiCount").textContent = verdict;
 }
 const F = () => state.guests/BASE;
+const EJ = ["Santiago Abascal","Irene Montero","Ada Colau","Pedro Sánchez","Alberto Núñez Feijóo"];
 const RB = () => Math.max(1, Math.round(num(state.base)||BASE));
 const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const num = v => { const n = parseFloat(String(v).replace(",", ".")); return isFinite(n) && n>=0 ? n : 0; };
@@ -1384,7 +1385,7 @@ function renderRecipes(){
   const box = document.getElementById("recipes");
   const chosen = DISHES.filter(d=>state.sel.includes(d.id));
   if(!chosen.length){ box.innerHTML = `<p class="empty">No hay platos elegidos. Toca alguno arriba para ver su receta.</p>`; return; }
-  box.innerHTML = chosen.map(d=>`
+  box.innerHTML = chosen.map((d,di)=>`
     <article class="recipe${d.img?" night":""}" id="r-${d.id}">
       <div class="${d.img?"night-top":"recipe-head"}">
         <div class="recipe-head">
@@ -1395,7 +1396,7 @@ function renderRecipes(){
         ${d.img?`<img class="flame" src="${FLAME}" alt="Cucharón vertiendo orujo en llamas azules sobre el pote de la queimada">`:""}
       </div>
       <div class="assign">
-        <label for="dw-${d.id}">Se encarga <input type="text" list="peopleList" id="dw-${d.id}" data-dwho="${d.id}" value="${esc(pname(state.who["dish:"+d.id]||""))}" placeholder="Nombre, ej. Pepito" maxlength="40" autocomplete="off"></label>
+        <label for="dw-${d.id}">Se encarga <input type="text" list="peopleList" id="dw-${d.id}" data-dwho="${d.id}" value="${esc(pname(state.who["dish:"+d.id]||""))}" placeholder="ej. ${EJ[di%EJ.length]}" maxlength="40" autocomplete="off"></label>
         <button type="button" class="chip enc" id="en-${d.id}" data-enc="${d.id}" aria-pressed="${isEnc(d.id)}">${isEnc(d.id)?"✓ Encargado fuera":"Encargar fuera"}</button>
         ${isEnc(d.id)?`<div class="encfields"><input type="text" id="es-${d.id}" data-sitio="${d.id}" value="${esc(state.enc[d.id].sitio||"")}" placeholder="Sitio: panadería, restaurante, teléfono…" aria-label="Dónde se encarga ${esc(d.name)}">
           <label for="eh-${d.id}">Recogida <input type="datetime-local" id="eh-${d.id}" data-hora="${d.id}" value="${esc(state.enc[d.id].hora||"")}"></label></div>`:""}
@@ -1517,10 +1518,10 @@ function renderPlanning(){
   document.getElementById("planning").innerHTML = days.map(d=>{ const n=daysTo(d);
     const rel = n===0?"Hoy":n===1?"Mañana":n>1?`Faltan ${n} días`:"Ya pasó";
     return `<div class="plan-day${d===nextDay?" next":""}${n<0?" past":""}"><h3><span>${esc(dayLabel(d))}${d===EVENT_DAY?" · la cena":""}</span><span>${rel}</span></h3>
-      ${byDay[d].map(t=>{ const st=state.tasks[t.id]||{}; const w=pname(st.who||"");
+      ${byDay[d].map((t,ti)=>{ const st=state.tasks[t.id]||{}; const w=pname(st.who||"");
         return `<div class="task${st.done?" done":""}"><input type="checkbox" id="tk-${t.id}" data-tk="${t.id}" ${st.done?"checked":""} aria-label="Hecho: ${esc(t.title)}">
           <label class="tt" for="tk-${t.id}">${t.t?`<small>${esc(t.t)}</small>`:""}${esc(t.title)}</label>
-          <span class="tw"><input type="text" list="peopleList" id="tw-${t.id}" data-tw="${t.id}" value="${esc(w)}" placeholder="Quién" maxlength="40" autocomplete="off" aria-label="Quién hace: ${esc(t.title)}"></span>
+          <span class="tw"><input type="text" list="peopleList" id="tw-${t.id}" data-tw="${t.id}" value="${esc(w)}" placeholder="ej. ${EJ[(ti+days.indexOf(d))%EJ.length]}" maxlength="40" autocomplete="off" aria-label="Quién hace: ${esc(t.title)}"></span>
           ${t.custom?`<button type="button" class="x" data-tkrm="${t.id}" aria-label="Quitar tarea">✕</button>`:"<span></span>"}</div>`; }).join("")}</div>`; }).join("");
 }
 function renderTeam(){
