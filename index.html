@@ -17,7 +17,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>window.PETEIRADA_FIREBASE = {"apiKey":"AIzaSyC4NSC0OmccfTWYhtx0CA1hTLd-nA58FU4","authDomain":"peteirada.firebaseapp.com","projectId":"peteirada","storageBucket":"peteirada.firebasestorage.app","messagingSenderId":"69304947720","appId":"1:69304947720:web:69d54c0917199898cb2dbd"};</script>
-<script>(function(){ var BUILD="20261107104031";
+<script>(function(){ var BUILD="20261107104407";
   function check(){ try{ fetch("version.txt?t="+Date.now(),{cache:"no-store"}).then(function(r){ return r.ok?r.text():""; }).then(function(v){ v=(v||"").trim(); if(!v||v===BUILD) return; var u=new URL(location.href); if(u.searchParams.get("v")===v) return; u.searchParams.set("v",v); location.replace(u.toString()); }).catch(function(){}); }catch(e){} }
   check(); document.addEventListener("visibilitychange",function(){ if(document.visibilityState==="visible") check(); });
 })();</script>
@@ -913,7 +913,7 @@ const DISHES = [
    {k:"quesocrema",n:"Queso crema",q:70,u:"g",s:"Quesos y lácteos"},
    {k:"limon",n:"Limones",q:0.1,u:"ud",s:"Frutería"}],
   steps:["Mezcla el queso crema con unas gotas de limón y una pizca de pimienta.","Abre los croissants por un lado sin llegar a partirlos del todo.","Unta el interior con la crema de queso y mete una loncha de salmón doblada.","Colócalos en bandejas y guárdalos tapados en la nevera hasta servir."],
-  tip:"Si los calentáis 3 minutos en el horno antes de rellenar, quedan más crujientes. Rellenarlos como mucho 2 horas antes para que no se ablanden."},
+  tip:"Si los calentáis 3 minutos en el horno antes de rellenar, quedan más crujientes. Rellenarlos como mucho 2 horas antes para que no se ablanden. En el vídeo llevan pepino: nosotros los hacemos sin pepino."},
 
  {id:"chorizos",c:"fuego",name:"Chorizos al vino",chic:"Chorizo de matanza guisado lentamente al vino tinto",time:"30 min",
   ings:[
@@ -1111,6 +1111,7 @@ const TASKS = [
  {id:"cafe",d:"2026-12-19",t:"Sobremesa",title:"Preparar el café de pota descafeinado",dish:"cafe"},
  {id:"queimada",d:"2026-12-19",t:"Sobremesa",title:"Queimada y conxuro",dish:"queimada"}
 ];
+const DEFAULT_VIDEOS = {huevos:"https://youtube.com/shorts/DTqcpBCSxhk", croissant:"https://youtube.com/shorts/bfxTcfU_-xc", hojaldre:"https://youtube.com/shorts/exZhUA5spTQ"};
 const LS = "peteirada-2026-v3";
 const SHARED = ["videos","base","wineGoal","show","welcome","autoGuests","testUrl","rsvpManual","guests","sel","done","stock","ov","custom","fruits","drinks","menaje","people","who","enc","encDone","mob","eq","eqCustom","tasks","taskCustom","pinHash"];
 let state = {guests:50, sel:DISHES.map(d=>d.id), done:[], stock:{}, ov:{}, custom:{},
@@ -1125,7 +1126,7 @@ function normalize(){
   MENAJE.forEach(m=>{ if(!state.menaje[m.k]) state.menaje[m.k]={on:true,pp:m.pp}; });
   state.people=state.people||[]; state.who=state.who||{}; state.enc=state.enc||{}; state.encDone=state.encDone||[];
   state.mob=Object.assign({plazasMesa:8,bancos:0,plazasBanco:4,mesas:10}, state.mob||{}); if(!state.mob.mesas||state.mob.mesas===8) state.mob.mesas=10;
-  state.eq=state.eq||{}; state.eqCustom=state.eqCustom||[]; state.tasks=state.tasks||{}; state.taskCustom=state.taskCustom||[]; state.rsvpManual=state.rsvpManual||[]; state.testUrl=state.testUrl||""; state.show=state.show||{}; state.wineGoal=state.wineGoal||{}; if(!state.videos) state.videos={huevos:"https://youtube.com/shorts/DTqcpBCSxhk"}; state.welcome=state.welcome||""; if(state.autoGuests===undefined) state.autoGuests=true; state.pinHash=state.pinHash||"c0b0d62c0e3ce4cd9efebf0b440ac96cd505def49f02e4437455fb3048aa7738";
+  state.eq=state.eq||{}; state.eqCustom=state.eqCustom||[]; state.tasks=state.tasks||{}; state.taskCustom=state.taskCustom||[]; state.rsvpManual=state.rsvpManual||[]; state.testUrl=state.testUrl||""; state.show=state.show||{}; state.wineGoal=state.wineGoal||{}; state.videos=Object.assign({}, DEFAULT_VIDEOS, state.videos||{}); state.welcome=state.welcome||""; if(state.autoGuests===undefined) state.autoGuests=true; state.pinHash=state.pinHash||"c0b0d62c0e3ce4cd9efebf0b440ac96cd505def49f02e4437455fb3048aa7738";
 }
 normalize();
 let me = ""; try{ me = localStorage.getItem("peteirada-me")||""; }catch(e){}
@@ -1613,7 +1614,7 @@ document.getElementById("autoG").addEventListener("change", e=>{ state.autoGuest
 const R = document.getElementById("recipes");
 R.addEventListener("input", e=>{ const t=e.target; if(t.dataset.k && t.dataset.d){ const ov = state.ov[t.dataset.d] = state.ov[t.dataset.d]||{}; ov[t.dataset.k] = Object.assign(ov[t.dataset.k]||{}, {q: t.dataset.fx==="1" ? num(t.value) : num(t.value)*BASE/RB()}); save(); refreshNumbers(); } });
 R.addEventListener("change", e=>{ const t=e.target;
-  if(t.dataset.vid){ const v=t.value.trim(); state.videos=state.videos||{}; if(v && !ytInfo(v)){ flash("Ese enlace no parece de YouTube"); return; } if(v) state.videos[t.dataset.vid]=v.slice(0,300); else delete state.videos[t.dataset.vid]; save(); renderRecipes(); applyRO(); return; }
+  if(t.dataset.vid){ const v=t.value.trim(); state.videos=state.videos||{}; if(v && !ytInfo(v)){ flash("Ese enlace no parece de YouTube"); return; } state.videos[t.dataset.vid]= v ? v.slice(0,300) : ""; save(); renderRecipes(); applyRO(); return; }
   if(t.dataset.dwho){ const id=personByName(t.value); if(id) state.who["dish:"+t.dataset.dwho]=id; else delete state.who["dish:"+t.dataset.dwho]; save(); renderAll(); }
   if(t.dataset.hora){ state.enc[t.dataset.hora].hora=t.value; save(); renderAll(); }
   if(t.dataset.iwho){ if(t.value) state.who["item:"+t.dataset.iwho]=t.value; else delete state.who["item:"+t.dataset.iwho]; save(); renderAll(); }
