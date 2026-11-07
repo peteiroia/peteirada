@@ -309,6 +309,8 @@ ol.steps li::marker{color:var(--pimenton);font-weight:700}
 .bottle{flex:1 1 120px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;background:var(--surface)}
 .bottle b{font-size:1.6rem;font-variant-numeric:tabular-nums;color:var(--pimenton);font-weight:700;line-height:1.1}
 .bottle span{font-size:.85rem;color:var(--muted)}
+.bottle input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--pimenton);font:700 1.4rem var(--body);font-variant-numeric:tabular-nums}
+.bottle small{font-size:.8rem;color:var(--pine);font-weight:600}
 
 /* Compra */
 .shop{display:flex;flex-direction:column;gap:18px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
@@ -626,7 +628,7 @@ footer{font-size:.85rem;color:var(--muted)}
         <label for="rSillas">Sillas (1 asiento)<input type="number" id="rSillas" min="0" max="60" step="1" inputmode="numeric"></label>
         <label for="rBancos">Bancos (4 asientos)<input type="number" id="rBancos" min="0" max="20" step="1" inputmode="numeric"></label>
       </div>
-      <div class="aport" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+      <div class="aport pro-only" style="grid-template-columns:repeat(2,minmax(0,1fr))">
         <label for="rTinto">Botellas de vino tinto<input type="number" id="rTinto" min="0" max="60" step="1" inputmode="numeric"></label>
         <label for="rBlanco">Botellas de vino blanco<input type="number" id="rBlanco" min="0" max="60" step="1" inputmode="numeric"></label>
       </div>
@@ -721,10 +723,10 @@ footer{font-size:.85rem;color:var(--muted)}
     <div class="wine-txt">
       <span class="eyebrow">El vino de la casa</span>
       <h2 id="wineTitle" class="script">Peteirada</h2>
-      <p class="lede">Vino de alta calidad embotellado especialmente para la Peteirada. Con las cantidades por persona de arriba, para esta cena hacen falta:</p>
+      <p class="lede">Vino de alta calidad embotellado especialmente para la Peteirada. Poned cuántas botellas hacen falta; lo que traigan los invitados se descuenta.</p>
       <div class="bottles">
-        <div class="bottle"><b id="vTinto">0</b><span>botellas de tinto</span></div>
-        <div class="bottle"><b id="vBranco">0</b><span>botellas de blanco</span></div>
+        <label class="bottle" for="wgTinto"><span>Botellas de tinto necesarias</span><input type="number" id="wgTinto" data-wg="tinto" min="0" max="200" step="1" inputmode="numeric" placeholder="—"><small id="vTinto"></small></label>
+        <label class="bottle" for="wgBlanco"><span>Botellas de blanco necesarias</span><input type="number" id="wgBlanco" data-wg="branco" min="0" max="200" step="1" inputmode="numeric" placeholder="—"><small id="vBranco"></small></label>
       </div>
     </div>
   </section>
@@ -1090,7 +1092,7 @@ const TASKS = [
  {id:"queimada",d:"2026-12-19",t:"Sobremesa",title:"Queimada y conxuro",dish:"queimada"}
 ];
 const LS = "peteirada-2026-v3";
-const SHARED = ["show","welcome","autoGuests","testUrl","rsvpManual","guests","sel","done","stock","ov","custom","fruits","drinks","menaje","people","who","enc","encDone","mob","eq","eqCustom","tasks","taskCustom","pinHash"];
+const SHARED = ["wineGoal","show","welcome","autoGuests","testUrl","rsvpManual","guests","sel","done","stock","ov","custom","fruits","drinks","menaje","people","who","enc","encDone","mob","eq","eqCustom","tasks","taskCustom","pinHash"];
 let state = {guests:50, sel:DISHES.map(d=>d.id), done:[], stock:{}, ov:{}, custom:{},
   fruits:["pina","fresa","uva","kiwi","mandarina"],
   drinks:Object.fromEntries(DRINKS.map(d=>[d.k,{on:!d.off,pp:d.pp}])),
@@ -1103,7 +1105,7 @@ function normalize(){
   MENAJE.forEach(m=>{ if(!state.menaje[m.k]) state.menaje[m.k]={on:true,pp:m.pp}; });
   state.people=state.people||[]; state.who=state.who||{}; state.enc=state.enc||{}; state.encDone=state.encDone||[];
   state.mob=Object.assign({plazasMesa:8,bancos:0,plazasBanco:4,mesas:10}, state.mob||{}); if(!state.mob.mesas||state.mob.mesas===8) state.mob.mesas=10;
-  state.eq=state.eq||{}; state.eqCustom=state.eqCustom||[]; state.tasks=state.tasks||{}; state.taskCustom=state.taskCustom||[]; state.rsvpManual=state.rsvpManual||[]; state.testUrl=state.testUrl||""; state.show=state.show||{}; state.welcome=state.welcome||""; if(state.autoGuests===undefined) state.autoGuests=true; state.pinHash=state.pinHash||"c0b0d62c0e3ce4cd9efebf0b440ac96cd505def49f02e4437455fb3048aa7738";
+  state.eq=state.eq||{}; state.eqCustom=state.eqCustom||[]; state.tasks=state.tasks||{}; state.taskCustom=state.taskCustom||[]; state.rsvpManual=state.rsvpManual||[]; state.testUrl=state.testUrl||""; state.show=state.show||{}; state.wineGoal=state.wineGoal||{}; state.welcome=state.welcome||""; if(state.autoGuests===undefined) state.autoGuests=true; state.pinHash=state.pinHash||"c0b0d62c0e3ce4cd9efebf0b440ac96cd505def49f02e4437455fb3048aa7738";
 }
 normalize();
 let me = ""; try{ me = localStorage.getItem("peteirada-me")||""; }catch(e){}
@@ -1175,20 +1177,21 @@ const pFill=k=>{ const p=PARTIES.find(x=>x.k===k); return p?(p.fill||p.c):"#a87a
 const pOpts=v=>`<option value=""></option>`+PARTIES.map(p=>`<option value="${p.k}" ${p.k===v?"selected":""}>${p.n}</option>`).join("");
 function allRsvps(){ return rsvpRemote.map(r=>Object.assign({remote:true},r)).concat((state.rsvpManual||[]).map(r=>Object.assign({manual:true},r))); }
 function rsvpTotals(){ const t={personas:0,mesas:0,sillas:0,bancos:0,tinto:0,blanco:0,fams:0}; allRsvps().forEach(r=>{ t.fams++; t.personas+=(r.personas||[]).length; t.mesas+=+r.mesas||0; t.sillas+=+r.sillas||0; t.bancos+=+r.bancos||0; t.tinto+=+r.tinto||0; t.blanco+=+r.blanco||0; }); t.asientos=t.sillas+4*t.bancos; return t; }
-function wineGoal(k){ const st=state.drinks[k]; return st&&st.on ? Math.max(1,Math.ceil(st.pp*state.guests-1e-9)) : null; }
+function wineGoal(k){ const v=Math.round(num((state.wineGoal||{})[k]||0)); return v>0?v:null; }
 function aportado(k){ const t=rsvpTotals(); return k==="mb_mesa"?t.mesas:k==="mb_asiento"?t.asientos:k==="dr_tinto"?t.tinto:k==="dr_branco"?t.blanco:0; }
 function cleanNames(arr){ return arr.map(n=>String(n||"").trim().slice(0,30)).filter(Boolean).slice(0,30); }
 function renderRsvp(){
   try{ renderHemi(); }catch(e){}
   const t=rsvpTotals(); const objM=Math.min(10,Math.max(1,Math.round(state.mob.mesas||10))); const needSeats=Math.max(t.personas, 1);
-  const tile=(val,label,goal)=>{ const pct=goal?Math.min(100,Math.round(val*100/goal)):100; const short=goal&&val<goal; return `<div class="tot${short?" short":""}${goal&&!short?" done":""}"><b>${val}${goal?" / "+goal:""}</b><span>${label}</span>${goal?`<div class="bar"><i style="width:${pct}%"></i></div>`:""}${goal&&!short?`<span class="goal">✓ ¡Objetivo cumplido!</span>`:""}</div>`; };
-  document.getElementById("rsvpTotals").innerHTML = tile(t.personas,"personas apuntadas") + tile(t.mesas,"mesas plegables",objM) + tile(t.asientos,"asientos",SEATS_GOAL) + tile(t.tinto,"botellas de vino tinto",wineGoal("tinto")) + tile(t.blanco,"botellas de vino blanco",wineGoal("branco"));
+  const tile=(val,label,goal,cls)=>{ const pct=goal?Math.min(100,Math.round(val*100/goal)):100; const short=goal&&val<goal; return `<div class="tot${short?" short":""}${goal&&!short?" done":""}${cls?" "+cls:""}"><b>${val}${goal?" / "+goal:""}</b><span>${label}</span>${goal?`<div class="bar"><i style="width:${pct}%"></i></div>`:""}${goal&&!short?`<span class="goal">✓ ¡Objetivo cumplido!</span>`:""}</div>`; };
+  document.getElementById("rsvpTotals").innerHTML = tile(t.personas,"personas apuntadas") + tile(t.mesas,"mesas plegables",objM) + tile(t.asientos,"asientos",SEATS_GOAL) + tile(t.tinto,"botellas de vino tinto",wineGoal("tinto"),"pro-only") + tile(t.blanco,"botellas de vino blanco",wineGoal("branco"),"pro-only");
   const list=allRsvps();
   document.getElementById("rList").innerHTML = list.length ? list.map(r=>{ const ps=r.personas||[]; const tags=[r.mesas?r.mesas+" mesa"+(r.mesas>1?"s":""):"", r.sillas?r.sillas+" silla"+(r.sillas>1?"s":""):"", r.bancos?r.bancos+" banco"+(r.bancos>1?"s":""):"", r.tinto?r.tinto+" botella"+(r.tinto>1?"s":"")+" de tinto":"", r.blanco?r.blanco+" botella"+(r.blanco>1?"s":"")+" de blanco":""].filter(Boolean);
     const canDel = mode==="pro" && (r.manual || (DB && !readOnly));
     return `<div class="arow"><div><span class="who">${esc(ps[0]||r.nombre||"Sin nombre")}${ps.length>1?` <small style="display:inline">y ${ps.length-1} más</small>`:""}</span><small>${esc(ps.join(", "))}</small>${tags.length?`<div class="tags">${tags.map(x=>`<span>Trae ${esc(x)}</span>`).join("")}</div>`:""}</div>
       <div style="display:flex;gap:8px;align-items:center"><b style="color:var(--pine)">${ps.length}</b>${canDel?`<button type="button" class="x" data-rdel="${r.manual?"m:":"r:"}${esc(r.id)}" aria-label="Borrar inscripción de ${esc(ps[0]||"")}">✕</button>`:""}</div></div>`; }).join("") : `<p class="hint">Todavía no se ha apuntado nadie. ¡Sé el primero!</p>`;
   if(rsvpDirty) readDraft(); renderDraft();
+  { const tt=rsvpTotals(); const a=document.getElementById("vTinto"), b=document.getElementById("vBranco"); if(a) a.textContent = tt.tinto?`Aportan los invitados: ${tt.tinto}`:""; if(b) b.textContent = tt.blanco?`Aportan los invitados: ${tt.blanco}`:""; }
 }
 function renderDraft(){
   const box=document.getElementById("rNames");
@@ -1411,9 +1414,9 @@ function renderRecipes(){
     </article>`).join("");
 }
 
-function drinkNeed(d){ const st=state.drinks[d.k]; return st.pp*state.guests/d.c; }
+function drinkNeed(d){ if(d.k==="tinto"||d.k==="branco") return wineGoal(d.k)||0; const st=state.drinks[d.k]; return st.pp*state.guests/d.c; }
 function renderDrinks(){
-  document.getElementById("drinks").innerHTML = DRINKS.map(d=>{ const st=state.drinks[d.k];
+  document.getElementById("drinks").innerHTML = DRINKS.filter(d=>d.k!=="tinto"&&d.k!=="branco").map(d=>{ const st=state.drinks[d.k];
     return `<div class="prow${st.on?"":" off"}">
       <input type="checkbox" id="dr-on-${d.k}" data-dk="${d.k}" ${st.on?"checked":""} aria-label="Incluir ${esc(d.n)}">
       <label class="nm" for="dr-on-${d.k}">${esc(d.n)}<small>${esc(d.b)}</small></label>
@@ -1421,8 +1424,7 @@ function renderDrinks(){
       <div class="qn">${st.on?fmtNeed(drinkNeed(d),d.b,d.b1):"—"}</div>
     </div>`; }).join("");
   const t=state.drinks.tinto, b=state.drinks.branco;
-  document.getElementById("vTinto").textContent = t.on?Math.ceil(t.pp*state.guests-1e-9):0;
-  document.getElementById("vBranco").textContent = b.on?Math.ceil(b.pp*state.guests-1e-9):0;
+  { const tt=rsvpTotals(); [["Tinto","tinto",tt.tinto],["Blanco","branco",tt.blanco]].forEach(([id,k,ap])=>{ const inp=document.getElementById("wg"+id); if(document.activeElement!==inp) inp.value = wineGoal(k)||""; document.getElementById(id==="Tinto"?"vTinto":"vBranco").textContent = ap?`Aportan los invitados: ${ap}`:""; }); }
 }
 function renderMenaje(){
   document.getElementById("menaje").innerHTML = MENAJE.map(m=>{ const st=state.menaje[m.k]; const n=Math.ceil(st.pp*state.guests-1e-9);
@@ -1438,7 +1440,7 @@ function buildList(){
   const map = new Map();
   const add = (k,o,dish) => { const c=map.get(k); if(c){ if(!o.fixed) c.q+=o.q; if(dish&&!c.dishes.includes(dish)) c.dishes.push(dish); } else map.set(k, Object.assign({dishes:dish?[dish]:[]}, o)); };
   DISHES.filter(d=>state.sel.includes(d.id) && !isEnc(d.id)).forEach(d=>ings(d).filter(i=>!i.off).forEach(i=>{ add(i.k,{k:i.k,n:i.n.replace(/ \(para .*\)| \(lata 115 g\)/,""),u:i.u,s:i.s,q:scaled(i),fixed:i.fixed,dishIds:[]},d.name); const c=map.get(i.k); if(!c.dishIds.includes(d.id)) c.dishIds.push(d.id); }));
-  DRINKS.forEach(d=>{ if(state.drinks[d.k].on) add("dr_"+d.k,{k:"dr_"+d.k,n:d.n,u:d.b,u1:d.b1,s:"Bebidas",q:drinkNeed(d)},null); });
+  DRINKS.forEach(d=>{ if(state.drinks[d.k].on && drinkNeed(d)>0) add("dr_"+d.k,{k:"dr_"+d.k,n:d.n,u:d.b,u1:d.b1,s:"Bebidas",q:drinkNeed(d)},null); });
   MENAJE.forEach(m=>{ const st=state.menaje[m.k]; if(st.on) add("mn_"+m.k,{k:"mn_"+m.k,n:m.n,u:"ud",s:"Menaje",q:st.pp*state.guests,pack:m.p},null); });
   MOB.forEach(m=>{ const n=m.calc(); if(n>0) add("mb_"+m.k,{k:"mb_"+m.k,n:m.n,u:"ud",s:"Mobiliario",q:n},null); });
   eqItems().forEach(e=>{ if(e.on && e.qty>0) add("eq_"+e.k,{k:"eq_"+e.k,n:e.n,u:"ud",s:EQ_SEC[e.g]||"Otros",q:e.qty},null); });
@@ -1559,7 +1561,7 @@ function mineText(pid){
 }
 function applyRO(){
   if(!readOnly) return;
-  document.querySelectorAll("#recipes input,#recipes select,#recipes button,#drinks input,#menaje input,.mobset input,#list input,#list select,#encList input,.controls .stepper button,.controls .stepper input,#autoG,#chips button,#selAll,#selNone,#reset,#equip input,#equip button,#addEq input,#addEq select,#addEq button,#planning input,#planning button,#addTask input,#addTask button,#pinSet input,#pinSet button").forEach(e=>{ if(!e.classList.contains("keep")) e.disabled=true; });
+  document.querySelectorAll("#recipes input,#recipes select,#recipes button,#drinks input,#menaje input,.mobset input,#list input,#list select,#encList input,.controls .stepper button,.controls .stepper input,#autoG,#chips button,#selAll,#selNone,#reset,#equip input,#equip button,#addEq input,#addEq select,#addEq button,#planning input,#planning button,#addTask input,#addTask button,#pinSet input,#pinSet button,.bottles input").forEach(e=>{ if(!e.classList.contains("keep")) e.disabled=true; });
 }
 function syncGuests(){ if(state.autoGuests===false) return false; const n=Math.min(60,rsvpTotals().personas); if(n>=4 && n!==state.guests){ state.guests=n; return true; } return false; }
 function renderAll(){ syncGuests(); try{ renderChat(); }catch(e){} renderSuper(); renderPolls(); renderHemi(); renderTestStats(); renderTest(); renderRsvp(); renderTop(); renderTeam(); renderRecipes(); renderDrinks(); renderMenaje(); renderMob(); renderEquip(); renderPlanning(); renderEnc(); renderList(); renderMode(); applyRO(); }
@@ -1599,7 +1601,8 @@ R.addEventListener("submit", e=>{ e.preventDefault(); const fm=e.target, d=fm.da
   if(!n) return; (state.custom[d]=state.custom[d]||[]).push({k:"c_"+Date.now().toString(36), n, q, u, s:"Otros"}); save(); renderAll(); flash(n+" añadido a la lista"); });
 
 document.getElementById("drinks").addEventListener("change", e=>{ const t=e.target; if(t.dataset.dk){ state.drinks[t.dataset.dk].on=t.checked; save(); refreshNumbers(); } });
-document.getElementById("drinks").addEventListener("input", e=>{ const t=e.target; if(t.dataset.dpp){ state.drinks[t.dataset.dpp].pp=num(t.value); save(); renderTop(); renderList(); const el=t.closest(".prow").querySelector(".qn"); const d=DRINKS.find(x=>x.k===t.dataset.dpp); if(state.drinks[d.k].on) el.textContent=fmtNeed(drinkNeed(d),d.b,d.b1); document.getElementById("vTinto").textContent=state.drinks.tinto.on?Math.ceil(state.drinks.tinto.pp*state.guests-1e-9):0; document.getElementById("vBranco").textContent=state.drinks.branco.on?Math.ceil(state.drinks.branco.pp*state.guests-1e-9):0; } });
+document.querySelector(".bottles").addEventListener("change", e=>{ const t=e.target; if(!t.dataset.wg) return; state.wineGoal=state.wineGoal||{}; const v=Math.round(num(t.value)); if(v>0) state.wineGoal[t.dataset.wg]=v; else delete state.wineGoal[t.dataset.wg]; save(); refreshNumbers(); });
+document.getElementById("drinks").addEventListener("input", e=>{ const t=e.target; if(t.dataset.dpp){ state.drinks[t.dataset.dpp].pp=num(t.value); save(); renderTop(); renderList(); const el=t.closest(".prow").querySelector(".qn"); const d=DRINKS.find(x=>x.k===t.dataset.dpp); if(state.drinks[d.k].on) el.textContent=fmtNeed(drinkNeed(d),d.b,d.b1); } });
 document.getElementById("menaje").addEventListener("change", e=>{ const t=e.target; if(t.dataset.mk){ state.menaje[t.dataset.mk].on=t.checked; save(); refreshNumbers(); } });
 document.getElementById("menaje").addEventListener("input", e=>{ const t=e.target; if(t.dataset.mpp){ state.menaje[t.dataset.mpp].pp=num(t.value); save(); renderList(); const st=state.menaje[t.dataset.mpp]; if(st.on) t.closest(".prow").querySelector(".qn").textContent=Math.ceil(st.pp*state.guests-1e-9)+" ud"; } });
 
