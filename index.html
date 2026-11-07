@@ -712,7 +712,7 @@ footer{font-size:.85rem;color:var(--muted)}
 
 
 
-  <div class="pro-only" style="display:flex;flex-direction:column;gap:6px"><span class="eyebrow">Paso 3 · Recetas y cantidades</span><p class="lede">Cada receta se muestra para las personas de referencia que elijas arriba y se multiplica por los invitados. Aquí también decides quién se encarga y si se encarga fuera.</p></div>
+  <div class="pro-only" style="display:flex;flex-direction:column;gap:6px"><span class="eyebrow">Paso 3 · Recetas y cantidades</span><p class="lede">Aquí decides quién se encarga de cada plato y si se encarga fuera.</p></div>
   <section class="recipes pro-only" id="recipes" aria-label="Recetas"></section>
 
   <section class="block pro-only" aria-labelledby="drinksTitle">
@@ -812,7 +812,7 @@ footer{font-size:.85rem;color:var(--muted)}
   </section>
 
   <div class="garland lights pro-only" aria-hidden="true"></div>
-  <footer class="pro-only">Cantidades orientativas para un menú de picoteo con varios platos. Las recetas están pensadas para 4 personas y se multiplican por el número de invitados. Revisa sal, aceite y especias en casa antes de comprar.</footer>
+  <footer class="pro-only">Cantidades orientativas para un menú de picoteo con varios platos. Revisa sal, aceite y especias en casa antes de comprar.</footer>
 </div>
 
 <script>
@@ -1401,7 +1401,7 @@ function renderRecipes(){
           <label for="eh-${d.id}">Recogida <input type="datetime-local" id="eh-${d.id}" data-hora="${d.id}" value="${esc(state.enc[d.id].hora||"")}"></label></div>`:""}
       </div>
       ${isEnc(d.id)?`<p class="encnote">Encargado${state.enc[d.id].sitio?" en "+esc(state.enc[d.id].sitio):""}${state.enc[d.id].hora?" · recogida "+esc(fmtHora(state.enc[d.id].hora)):""}: sus ingredientes no entran en la lista de la compra.</p>`:""}
-      ${d.fruits?`<div class="fruitbox"><h3>Elige las frutas</h3><div class="chips">${FRUITS.map(f=>{const on=state.fruits.includes(f.k);return `<button type="button" class="chip fruit" id="f-${f.k}" data-f="${f.k}" aria-pressed="${on}">${on?"✓":"+"} ${esc(f.n.replace(/ \(.*\)/,""))}</button>`;}).join("")}</div><p class="hint">600 g de fruta por cada 4 personas, repartidos a partes iguales entre las que elijas.</p></div>`:""}
+      ${d.fruits?`<div class="fruitbox"><h3>Elige las frutas</h3><div class="chips">${FRUITS.map(f=>{const on=state.fruits.includes(f.k);return `<button type="button" class="chip fruit" id="f-${f.k}" data-f="${f.k}" aria-pressed="${on}">${on?"✓":"+"} ${esc(f.n.replace(/ \(.*\)/,""))}</button>`;}).join("")}</div><p class="hint">${nf(600*RB()/BASE,0)} g de fruta por cada ${RB()} personas, repartidos a partes iguales entre las que elijas.</p></div>`:""}
       <div class="tbl${isEnc(d.id)?" encargado":""}">
         <div class="tbl-head"><span>Ingrediente</span><span>Para ${RB()}</span><span>Para ${state.guests}</span><span>Quién</span><span></span></div>
         ${ings(d).map(i=>ingRow(d,i)).join("")}
@@ -1660,7 +1660,7 @@ function renderMode(){
   document.getElementById("modePro").textContent = mode==="super" ? "Superadmin ★" : (unlocked()?"Privado":"Privado 🔒");
   const show=state.show||{};
   document.querySelectorAll("[data-sec]").forEach(el=>el.classList.toggle("sec-off", !priv && show[el.dataset.sec]===false));
-  document.getElementById("heroLede").textContent = priv ? (mode==="super"?"Modo superadministrador: todo lo del modo privado, más encuestas y ajustes de la web.":"Modo privado: recetas para 4 que se multiplican por los invitados, planning, reparto, utensilios y la lista de la compra.") : (state.welcome || "Sábado 19 de diciembre de 2026. Apúntate con los tuyos y dinos qué puedes aportar.");
+  document.getElementById("heroLede").textContent = priv ? (mode==="super"?"Modo superadministrador: todo lo del modo privado, más encuestas y ajustes de la web.":"Modo privado: platos, recetas, planning, reparto, utensilios y la lista de la compra.") : (state.welcome || "Sábado 19 de diciembre de 2026. Apúntate con los tuyos y dinos qué puedes aportar.");
 }
 document.getElementById("modeGuest").onclick=()=>{ mode="guest"; document.getElementById("pinbox").hidden=true; try{ localStorage.setItem("peteirada-mode","guest"); }catch(e){} renderMode(); };
 document.getElementById("modePro").onclick=()=>{ if(superOk()||unlocked()){ mode=superOk()?"super":"pro"; document.getElementById("pinbox").hidden=true; try{ localStorage.setItem("peteirada-mode",mode); }catch(e){} renderMode(); applyRO(); }
