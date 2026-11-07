@@ -17,6 +17,10 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>window.PETEIRADA_FIREBASE = {"apiKey":"AIzaSyC4NSC0OmccfTWYhtx0CA1hTLd-nA58FU4","authDomain":"peteirada.firebaseapp.com","projectId":"peteirada","storageBucket":"peteirada.firebasestorage.app","messagingSenderId":"69304947720","appId":"1:69304947720:web:69d54c0917199898cb2dbd"};</script>
+<script>(function(){ var BUILD="20261107103755";
+  function check(){ try{ fetch("version.txt?t="+Date.now(),{cache:"no-store"}).then(function(r){ return r.ok?r.text():""; }).then(function(v){ v=(v||"").trim(); if(!v||v===BUILD) return; var u=new URL(location.href); if(u.searchParams.get("v")===v) return; u.searchParams.set("v",v); location.replace(u.toString()); }).catch(function(){}); }catch(e){} }
+  check(); document.addEventListener("visibilitychange",function(){ if(document.visibilityState==="visible") check(); });
+})();</script>
 <script>(function(){
   var CFG = window.PETEIRADA_FIREBASE;
   var ready = new Promise(function(resolve){
