@@ -17,7 +17,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>window.PETEIRADA_FIREBASE = {"apiKey":"AIzaSyC4NSC0OmccfTWYhtx0CA1hTLd-nA58FU4","authDomain":"peteirada.firebaseapp.com","projectId":"peteirada","storageBucket":"peteirada.firebasestorage.app","messagingSenderId":"69304947720","appId":"1:69304947720:web:69d54c0917199898cb2dbd"};</script>
-<script>(function(){ var BUILD="20261107103755";
+<script>(function(){ var BUILD="20261107103922";
   function check(){ try{ fetch("version.txt?t="+Date.now(),{cache:"no-store"}).then(function(r){ return r.ok?r.text():""; }).then(function(v){ v=(v||"").trim(); if(!v||v===BUILD) return; var u=new URL(location.href); if(u.searchParams.get("v")===v) return; u.searchParams.set("v",v); location.replace(u.toString()); }).catch(function(){}); }catch(e){} }
   check(); document.addEventListener("visibilitychange",function(){ if(document.visibilityState==="visible") check(); });
 })();</script>
@@ -538,6 +538,16 @@ body.super .super-only{display:flex!important}
 .quicknav::-webkit-scrollbar{display:none}
 .quicknav button{flex:none;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:600 .85rem var(--body);cursor:pointer;white-space:nowrap}
 .quicknav button:hover,.quicknav button.on{background:var(--pine);border-color:var(--pine);color:var(--bg)}
+.vid{display:flex;flex-direction:column;gap:8px}
+.vidbox summary{cursor:pointer;display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;background:var(--pimenton);color:#fff;font-weight:700;font-size:.9rem;list-style:none}
+.vidbox summary::-webkit-details-marker{display:none}
+.vidbox[open] summary{margin-bottom:10px}
+.yt{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000}
+.yt.short{aspect-ratio:9/16;max-width:320px}
+.yt iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.vidset{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--muted);flex-wrap:wrap}
+.vidset input{flex:1 1 200px;min-width:0;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);font:500 .85rem var(--body)}
+.recipe.night .vidset input{background:var(--night-2);color:var(--night-ink);border-color:#3a3555}
 .status{font-size:.85rem;color:var(--pine);min-height:1.2em;margin:0}
 .empty{color:var(--muted);margin:0}
 footer{font-size:.85rem;color:var(--muted)}
@@ -1100,7 +1110,7 @@ const TASKS = [
  {id:"queimada",d:"2026-12-19",t:"Sobremesa",title:"Queimada y conxuro",dish:"queimada"}
 ];
 const LS = "peteirada-2026-v3";
-const SHARED = ["base","wineGoal","show","welcome","autoGuests","testUrl","rsvpManual","guests","sel","done","stock","ov","custom","fruits","drinks","menaje","people","who","enc","encDone","mob","eq","eqCustom","tasks","taskCustom","pinHash"];
+const SHARED = ["videos","base","wineGoal","show","welcome","autoGuests","testUrl","rsvpManual","guests","sel","done","stock","ov","custom","fruits","drinks","menaje","people","who","enc","encDone","mob","eq","eqCustom","tasks","taskCustom","pinHash"];
 let state = {guests:50, sel:DISHES.map(d=>d.id), done:[], stock:{}, ov:{}, custom:{},
   fruits:["pina","fresa","uva","kiwi","mandarina"],
   drinks:Object.fromEntries(DRINKS.map(d=>[d.k,{on:!d.off,pp:d.pp}])),
@@ -1113,7 +1123,7 @@ function normalize(){
   MENAJE.forEach(m=>{ if(!state.menaje[m.k]) state.menaje[m.k]={on:true,pp:m.pp}; });
   state.people=state.people||[]; state.who=state.who||{}; state.enc=state.enc||{}; state.encDone=state.encDone||[];
   state.mob=Object.assign({plazasMesa:8,bancos:0,plazasBanco:4,mesas:10}, state.mob||{}); if(!state.mob.mesas||state.mob.mesas===8) state.mob.mesas=10;
-  state.eq=state.eq||{}; state.eqCustom=state.eqCustom||[]; state.tasks=state.tasks||{}; state.taskCustom=state.taskCustom||[]; state.rsvpManual=state.rsvpManual||[]; state.testUrl=state.testUrl||""; state.show=state.show||{}; state.wineGoal=state.wineGoal||{}; state.welcome=state.welcome||""; if(state.autoGuests===undefined) state.autoGuests=true; state.pinHash=state.pinHash||"c0b0d62c0e3ce4cd9efebf0b440ac96cd505def49f02e4437455fb3048aa7738";
+  state.eq=state.eq||{}; state.eqCustom=state.eqCustom||[]; state.tasks=state.tasks||{}; state.taskCustom=state.taskCustom||[]; state.rsvpManual=state.rsvpManual||[]; state.testUrl=state.testUrl||""; state.show=state.show||{}; state.wineGoal=state.wineGoal||{}; if(!state.videos) state.videos={huevos:"https://youtube.com/shorts/DTqcpBCSxhk"}; state.welcome=state.welcome||""; if(state.autoGuests===undefined) state.autoGuests=true; state.pinHash=state.pinHash||"c0b0d62c0e3ce4cd9efebf0b440ac96cd505def49f02e4437455fb3048aa7738";
 }
 normalize();
 let me = ""; try{ me = localStorage.getItem("peteirada-me")||""; }catch(e){}
@@ -1278,6 +1288,8 @@ function renderHemi(){
 }
 const F = () => state.guests/BASE;
 const EJ = ["Santiago Abascal","Irene Montero","Ada Colau","Pedro Sánchez","Alberto Núñez Feijóo"];
+const EMBED = typeof window.PETEIRADA_FIREBASE!=="undefined";
+function ytInfo(u){ if(!u) return null; const m=String(u).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/))([A-Za-z0-9_-]{11})/); return m?{id:m[1], short:/\/shorts\//.test(u)}:null; }
 const RB = () => Math.max(1, Math.round(num(state.base)||BASE));
 const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const num = v => { const n = parseFloat(String(v).replace(",", ".")); return isFinite(n) && n>=0 ? n : 0; };
@@ -1418,6 +1430,11 @@ function renderRecipes(){
           ${(state.ov[d.id]&&Object.keys(state.ov[d.id]).length)||(state.custom[d.id]||[]).length?`<button type="button" class="btn ghost small" data-act="resetdish" data-d="${d.id}">Restablecer receta</button>`:""}
         </form>
       </div>
+      <div class="vid">${(()=>{ const u=(state.videos||{})[d.id]||""; const v=ytInfo(u);
+        const field=`<label class="vidset" for="vu-${d.id}"><span>Vídeo de YouTube</span><input type="url" id="vu-${d.id}" data-vid="${d.id}" value="${esc(u)}" placeholder="Pega aquí el enlace" inputmode="url"></label>`;
+        if(!v) return field;
+        const player = EMBED ? `<div class="yt${v.short?" short":""}"><iframe loading="lazy" src="https://www.youtube-nocookie.com/embed/${v.id}?rel=0&playsinline=1" title="Vídeo: ${esc(d.name)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>` : `<a class="btn small" href="https://www.youtube.com/watch?v=${v.id}" target="_blank" rel="noopener">Abrir en YouTube</a>`;
+        return `<details class="vidbox"><summary>▶ Ver el vídeo de la receta</summary>${player}</details>`+field; })()}</div>
       <h3>Preparación</h3>
       <ol class="steps">${d.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>
       <p class="tip"><b>Truco:</b> ${esc(d.tip)}</p>
@@ -1594,6 +1611,7 @@ document.getElementById("autoG").addEventListener("change", e=>{ state.autoGuest
 const R = document.getElementById("recipes");
 R.addEventListener("input", e=>{ const t=e.target; if(t.dataset.k && t.dataset.d){ const ov = state.ov[t.dataset.d] = state.ov[t.dataset.d]||{}; ov[t.dataset.k] = Object.assign(ov[t.dataset.k]||{}, {q: t.dataset.fx==="1" ? num(t.value) : num(t.value)*BASE/RB()}); save(); refreshNumbers(); } });
 R.addEventListener("change", e=>{ const t=e.target;
+  if(t.dataset.vid){ const v=t.value.trim(); state.videos=state.videos||{}; if(v && !ytInfo(v)){ flash("Ese enlace no parece de YouTube"); return; } if(v) state.videos[t.dataset.vid]=v.slice(0,300); else delete state.videos[t.dataset.vid]; save(); renderRecipes(); applyRO(); return; }
   if(t.dataset.dwho){ const id=personByName(t.value); if(id) state.who["dish:"+t.dataset.dwho]=id; else delete state.who["dish:"+t.dataset.dwho]; save(); renderAll(); }
   if(t.dataset.hora){ state.enc[t.dataset.hora].hora=t.value; save(); renderAll(); }
   if(t.dataset.iwho){ if(t.value) state.who["item:"+t.dataset.iwho]=t.value; else delete state.who["item:"+t.dataset.iwho]; save(); renderAll(); }
