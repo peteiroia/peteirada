@@ -578,7 +578,6 @@ footer{font-size:.85rem;color:var(--muted)}
 </div>
 
 <datalist id="peopleList"></datalist>
-<button type="button" class="sound keep" id="soundBtn" aria-pressed="true" aria-label="Villancico: activado"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path id="soundWaves" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg><span id="soundTxt">Villancico</span></button>
 <div class="wrap">
   <section class="controls pro-only" aria-labelledby="pickTitle">
     <span class="eyebrow">Paso 1</span>
@@ -1819,43 +1818,7 @@ document.getElementById("dlCarta").onclick = async ()=>{
   function step(){ flakes.forEach(f=>{ f.y+=f.s; f.d+=.01; f.x+=Math.sin(f.d)*.3; if(f.y>h+3){ f.y=-3; f.x=Math.random()*w; } }); draw(); if(!document.hidden) requestAnimationFrame(step); else setTimeout(()=>requestAnimationFrame(step),500); }
   size(); window.addEventListener("resize", size); if(!reduce) requestAnimationFrame(step); })();
 
-// Villancico: «Noche de paz» (Franz Gruber, 1818, dominio público) en caja de música
-const Music = (function(){
-  const N={C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392,A4:440,B4:493.88,C5:523.25,D5:587.33,E5:659.25,F5:698.46,G3:196,C3:130.81,F3:174.61};
-  const MEL=[["G4",3],["A4",1],["G4",2],["E4",6],["G4",3],["A4",1],["G4",2],["E4",6],["D5",4],["D5",2],["B4",6],["C5",4],["C5",2],["G4",6],
-    ["A4",4],["A4",2],["C5",3],["B4",1],["A4",2],["G4",3],["A4",1],["G4",2],["E4",6],["A4",4],["A4",2],["C5",3],["B4",1],["A4",2],["G4",3],["A4",1],["G4",2],["E4",6],
-    ["D5",4],["D5",2],["F5",3],["D5",1],["B4",2],["C5",6],["E5",6],["C5",3],["G4",1],["E4",2],["G4",3],["F4",1],["D4",2],["C4",12]];
-  const BASS=["C3","C3","G3","C3","F3","C3","F3","C3","G3","C3","C3","G3","C3"];
-  const E8=0.32; let ctx=null, master=null, on=true, timer=null, started=false;
-  try{ const v=localStorage.getItem("peteirada-sound"); if(v==="off") on=false; }catch(e){}
-  function note(f,t,d,vol){ const o=ctx.createOscillator(), o2=ctx.createOscillator(), g=ctx.createGain();
-    o.type="sine"; o2.type="triangle"; o.frequency.value=f; o2.frequency.value=f*2; const g2=ctx.createGain(); g2.gain.value=.18;
-    o.connect(g); o2.connect(g2); g2.connect(g); g.connect(master);
-    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+.015); g.gain.exponentialRampToValueAtTime(.0008,t+Math.max(.6,d*1.6));
-    o.start(t); o2.start(t); o.stop(t+Math.max(.7,d*1.7)); o2.stop(t+Math.max(.7,d*1.7)); }
-  function play(){ if(!ctx||!on) return; let t=ctx.currentTime+.1, beat=0;
-    MEL.forEach(([n,len])=>{ note(N[n],t,len*E8,.22); t+=len*E8; });
-    BASS.forEach((b,i)=>{ note(N[b], ctx.currentTime+.1+i*12*E8, 12*E8, .09); note(N[b]*1.5, ctx.currentTime+.1+i*12*E8+6*E8, 6*E8, .05); });
-    const total=MEL.reduce((a,m)=>a+m[1],0)*E8; timer=setTimeout(play,(total+2.5)*1000); }
-  function running(){ return !!(ctx && ctx.state==="running"); }
-  function ensure(){ if(!ctx){ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return false; ctx=new AC(); master=ctx.createGain(); master.gain.value=.55; master.connect(ctx.destination); ctx.onstatechange=ui; } return true; }
-  function unlock(){ try{ const b=ctx.createBuffer(1,1,22050), src=ctx.createBufferSource(); src.buffer=b; src.connect(ctx.destination); src.start(0); }catch(e){} }
-  function start(fromGesture){ if(!on) return; try{ if(!ensure()) return; if(fromGesture) unlock();
-      const go=()=>{ if(running() && !started){ started=true; play(); } ui(); };
-      if(ctx.state!=="running"){ const p=ctx.resume(); if(p&&p.then) p.then(go,()=>ui()); else go(); } else go(); }catch(e){} }
-  function stop(){ started=false; clearTimeout(timer); if(ctx){ try{ ctx.close(); }catch(e){} ctx=null; } }
-  function set(v){ on=v; try{ localStorage.setItem("peteirada-sound", v?"on":"off"); }catch(e){} if(v) start(true); else stop(); ui(); }
-  function ui(){ const b=document.getElementById("soundBtn"); if(!b) return; const playing = on && running() && started;
-    b.setAttribute("aria-pressed",String(on)); b.setAttribute("aria-label","Villancico: "+(!on?"silenciado":playing?"sonando":"toca para escuchar"));
-    b.classList.toggle("waiting", on && !playing);
-    document.getElementById("soundWaves").style.display=on?"":"none"; document.getElementById("soundTxt").textContent=!on?"Sin sonido":playing?"Villancico":"Toca para el villancico"; }
-  ui();
-  const first=()=>{ if(!on) return; start(true); if(running()&&started) ["pointerup","touchend","click","keydown"].forEach(ev=>document.removeEventListener(ev,first,true)); };
-  ["pointerup","touchend","click","keydown"].forEach(ev=>document.addEventListener(ev,first,true));
-  try{ start(false); }catch(e){}
-  document.getElementById("soundBtn").addEventListener("click", e=>{ e.stopPropagation(); if(on && !(running()&&started)){ start(true); } else set(!on); });
-  return {set};
-})();
+
 
 const QUIZ=[];
 
