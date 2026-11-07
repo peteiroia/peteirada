@@ -255,7 +255,7 @@ input[type=number]{-moz-appearance:textfield}
   .row{grid-template-columns:minmax(0,1fr) auto 34px;grid-template-areas:"nm nm x" "q4 qn qn" "wh wh wh";row-gap:4px}
   .row .wh{grid-area:wh}
   .row .nm{grid-area:nm}.row .q4{grid-area:q4;justify-content:flex-start}.row .qn{grid-area:qn}.row .x{grid-area:x;justify-self:end}
-  .q4::before{content:"Para 4:";font-size:.8rem;color:var(--muted)}
+  .q4::before{content:attr(data-l);font-size:.8rem;color:var(--muted)}
   .qn::before{content:attr(data-l);font-weight:400;font-size:.8rem;color:var(--muted);margin-right:6px}
 }
 .add{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding-top:10px}
@@ -589,6 +589,7 @@ footer{font-size:.85rem;color:var(--muted)}
         <input id="guests" type="number" min="4" max="60" step="1" value="50" inputmode="numeric">
         <button type="button" id="plus" aria-label="Añadir invitados">+</button>
       </div>
+      <label for="baseN" class="factor" style="display:flex;align-items:center;gap:6px">Recetas para <input type="number" id="baseN" min="1" max="60" step="1" inputmode="numeric" style="width:58px;padding:6px 8px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);font:700 1rem var(--body);text-align:center"> personas</label>
       <span class="factor" id="factor"></span>
     </div>
     <label class="hint" for="autoG" style="display:flex;gap:8px;align-items:center;font-size:.9rem;color:var(--ink)"><input type="checkbox" id="autoG" style="width:18px;height:18px;accent-color:var(--pine)"> <span id="autoGTxt">Calcular cantidades con las personas apuntadas</span></label>
@@ -707,7 +708,7 @@ footer{font-size:.85rem;color:var(--muted)}
 
 
 
-  <div class="pro-only" style="display:flex;flex-direction:column;gap:6px"><span class="eyebrow">Paso 3 · Recetas y cantidades</span><p class="lede">Cada receta está pensada para 4 personas y se multiplica por los invitados. Aquí también decides quién se encarga y si se encarga fuera.</p></div>
+  <div class="pro-only" style="display:flex;flex-direction:column;gap:6px"><span class="eyebrow">Paso 3 · Recetas y cantidades</span><p class="lede">Cada receta se muestra para las personas de referencia que elijas arriba y se multiplica por los invitados. Aquí también decides quién se encarga y si se encarga fuera.</p></div>
   <section class="recipes pro-only" id="recipes" aria-label="Recetas"></section>
 
   <section class="block pro-only" aria-labelledby="drinksTitle">
@@ -1091,7 +1092,7 @@ const TASKS = [
  {id:"queimada",d:"2026-12-19",t:"Sobremesa",title:"Queimada y conxuro",dish:"queimada"}
 ];
 const LS = "peteirada-2026-v3";
-const SHARED = ["wineGoal","show","welcome","autoGuests","testUrl","rsvpManual","guests","sel","done","stock","ov","custom","fruits","drinks","menaje","people","who","enc","encDone","mob","eq","eqCustom","tasks","taskCustom","pinHash"];
+const SHARED = ["base","wineGoal","show","welcome","autoGuests","testUrl","rsvpManual","guests","sel","done","stock","ov","custom","fruits","drinks","menaje","people","who","enc","encDone","mob","eq","eqCustom","tasks","taskCustom","pinHash"];
 let state = {guests:50, sel:DISHES.map(d=>d.id), done:[], stock:{}, ov:{}, custom:{},
   fruits:["pina","fresa","uva","kiwi","mandarina"],
   drinks:Object.fromEntries(DRINKS.map(d=>[d.k,{on:!d.off,pp:d.pp}])),
@@ -1268,6 +1269,7 @@ function renderHemi(){
   document.getElementById("hemiCount").textContent = verdict;
 }
 const F = () => state.guests/BASE;
+const RB = () => Math.max(1, Math.round(num(state.base)||BASE));
 const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const num = v => { const n = parseFloat(String(v).replace(",", ".")); return isFinite(n) && n>=0 ? n : 0; };
 const nf = (v,d=2) => (+v.toFixed(d)).toLocaleString("es-ES");
@@ -1351,7 +1353,7 @@ const MOB = [
 function renderTop(){
   document.getElementById("guests").value = state.guests;
   { const n=rsvpTotals().personas; document.getElementById("autoG").checked = state.autoGuests!==false; document.getElementById("autoGTxt").textContent = state.autoGuests!==false ? (n>=4 ? `Calculando con las ${n} personas apuntadas` : "Calcular con las personas apuntadas (cuando haya al menos 4)") : "Calcular cantidades con las personas apuntadas"; }
-  document.getElementById("factor").innerHTML = `Recetas para 4 × <b>${nf(F())}</b>`;
+  document.getElementById("factor").innerHTML = `${state.guests} ÷ ${RB()} = × <b>${nf(state.guests/RB())}</b>`; { const bi=document.getElementById("baseN"); if(document.activeElement!==bi) bi.value=RB(); }
   document.getElementById("chips").innerHTML = COURSES.map(c=>`<div class="chipgroup"><h3>${c.n}</h3><div class="picks">${DISHES.filter(d=>d.c===c.id).map(d=>{ const on = state.sel.includes(d.id);
     return `<button type="button" class="pick" id="chip-${d.id}" data-id="${d.id}" aria-pressed="${on}"><span class="ck" aria-hidden="true">✓</span><span><b>${esc(d.name)}</b><small>${esc(d.chic)}</small></span></button>`; }).join("")}</div></div>`).join("");
   const anyDrink = DRINKS.some(d=>state.drinks[d.k].on);
@@ -1363,10 +1365,10 @@ function renderTop(){
 
 function ingRow(d,i){
   const step = (i.u==="g")?10:(i.u==="kg"||i.u==="L")?0.05:(i.u==="ud"&&i.q>=1)?1:0.1;
-  const showQ = +(+i.q).toFixed(3);
+  const showQ = i.fixed ? +(+i.q).toFixed(3) : +(i.q*RB()/BASE).toFixed(3);
   return `<div class="row${i.off?" off":""}">
     <div class="nm">${esc(i.n)}${i.fixed?"<small>Una unidad, no se multiplica</small>":(i.edited?"<small>Cantidad cambiada</small>":"")}</div>
-    <div class="q4"><input type="number" id="q-${d.id}-${i.k}" aria-label="Cantidad para 4 de ${esc(i.n)}" data-d="${d.id}" data-k="${i.k}" value="${showQ}" step="${step}" min="0" inputmode="decimal"><span class="u">${esc(i.u)}</span></div>
+    <div class="q4" data-l="Para ${RB()}:"><input type="number" id="q-${d.id}-${i.k}" aria-label="Cantidad para ${RB()} de ${esc(i.n)}" data-d="${d.id}" data-k="${i.k}" data-fx="${i.fixed?1:0}" value="${showQ}" step="${step}" min="0" inputmode="decimal"><span class="u">${esc(i.u)}</span></div>
     <div class="qn" data-l="Para ${state.guests}:">${i.off?"—":fmtNeed(scaled(i),i.u)}</div>
     <div class="wh"><select id="iw-${d.id}-${i.k}" data-iwho="${i.k}" aria-label="Quién se encarga de ${esc(i.n)}">${(()=>{ const own=state.who["item:"+i.k]; const dw=state.who["dish:"+d.id]; return personOpts(own&&pname(own)?own:"", dw&&pname(dw)?"Del plato: "+pname(dw):"Quién lo trae"); })()}</select></div>
     ${i.off?`<button type="button" class="x back" title="Volver a poner" aria-label="Volver a poner ${esc(i.n)}" data-act="on" data-d="${d.id}" data-k="${i.k}">↺</button>`
@@ -1397,11 +1399,11 @@ function renderRecipes(){
       ${isEnc(d.id)?`<p class="encnote">Encargado${state.enc[d.id].sitio?" en "+esc(state.enc[d.id].sitio):""}${state.enc[d.id].hora?" · recogida "+esc(fmtHora(state.enc[d.id].hora)):""}: sus ingredientes no entran en la lista de la compra.</p>`:""}
       ${d.fruits?`<div class="fruitbox"><h3>Elige las frutas</h3><div class="chips">${FRUITS.map(f=>{const on=state.fruits.includes(f.k);return `<button type="button" class="chip fruit" id="f-${f.k}" data-f="${f.k}" aria-pressed="${on}">${on?"✓":"+"} ${esc(f.n.replace(/ \(.*\)/,""))}</button>`;}).join("")}</div><p class="hint">600 g de fruta por cada 4 personas, repartidos a partes iguales entre las que elijas.</p></div>`:""}
       <div class="tbl${isEnc(d.id)?" encargado":""}">
-        <div class="tbl-head"><span>Ingrediente</span><span>Para 4</span><span>Para ${state.guests}</span><span>Quién</span><span></span></div>
+        <div class="tbl-head"><span>Ingrediente</span><span>Para ${RB()}</span><span>Para ${state.guests}</span><span>Quién</span><span></span></div>
         ${ings(d).map(i=>ingRow(d,i)).join("")}
         <form class="add" data-d="${d.id}">
           <input type="text" id="add-n-${d.id}" placeholder="Añadir ingrediente" aria-label="Nombre del ingrediente nuevo" required>
-          <input type="number" id="add-q-${d.id}" placeholder="Para 4" aria-label="Cantidad para 4" step="any" min="0" inputmode="decimal" required>
+          <input type="number" id="add-q-${d.id}" placeholder="Para ${RB()}" aria-label="Cantidad para ${RB()}" step="any" min="0" inputmode="decimal" required>
           <select id="add-u-${d.id}" aria-label="Unidad">${["ud","g","kg","L","latas","botes","bolsas","paquetes"].map(u=>`<option>${u}</option>`).join("")}</select>
           <button class="btn small" type="submit">Añadir</button>
           ${(state.ov[d.id]&&Object.keys(state.ov[d.id]).length)||(state.custom[d.id]||[]).length?`<button type="button" class="btn ghost small" data-act="resetdish" data-d="${d.id}">Restablecer receta</button>`:""}
@@ -1560,7 +1562,7 @@ function mineText(pid){
 }
 function applyRO(){
   if(!readOnly) return;
-  document.querySelectorAll("#recipes input,#recipes select,#recipes button,#drinks input,#menaje input,.mobset input,#list input,#list select,#encList input,.controls .stepper button,.controls .stepper input,#autoG,#chips button,#selAll,#selNone,#reset,#equip input,#equip button,#addEq input,#addEq select,#addEq button,#planning input,#planning button,#addTask input,#addTask button,#pinSet input,#pinSet button,.bottles input").forEach(e=>{ if(!e.classList.contains("keep")) e.disabled=true; });
+  document.querySelectorAll("#recipes input,#recipes select,#recipes button,#drinks input,#menaje input,.mobset input,#list input,#list select,#encList input,.controls .stepper button,.controls .stepper input,#autoG,#baseN,#chips button,#selAll,#selNone,#reset,#equip input,#equip button,#addEq input,#addEq select,#addEq button,#planning input,#planning button,#addTask input,#addTask button,#pinSet input,#pinSet button,.bottles input").forEach(e=>{ if(!e.classList.contains("keep")) e.disabled=true; });
 }
 function syncGuests(){ if(state.autoGuests===false) return false; const n=Math.min(60,rsvpTotals().personas); if(n>=4 && n!==state.guests){ state.guests=n; return true; } return false; }
 function renderAll(){ syncGuests(); try{ renderChat(); }catch(e){} renderSuper(); renderPolls(); renderHemi(); renderTestStats(); renderTest(); renderRsvp(); renderTop(); renderTeam(); renderRecipes(); renderDrinks(); renderMenaje(); renderMob(); renderEquip(); renderPlanning(); renderEnc(); renderList(); renderMode(); applyRO(); }
@@ -1577,10 +1579,11 @@ function setGuests(v, keepAuto){ if(!keepAuto) state.autoGuests=false; state.gue
 document.getElementById("minus").onclick = ()=>setGuests(state.guests-(state.guests>10?5:1));
 document.getElementById("plus").onclick = ()=>setGuests(state.guests+(state.guests>=10?5:1));
 document.getElementById("guests").addEventListener("change", e=>setGuests(e.target.value));
+document.getElementById("baseN").addEventListener("change", e=>{ const v=Math.round(num(e.target.value)); state.base = v>=1 ? Math.min(60,v) : BASE; save(); renderAll(); });
 document.getElementById("autoG").addEventListener("change", e=>{ state.autoGuests=e.target.checked; save(); renderAll(); });
 
 const R = document.getElementById("recipes");
-R.addEventListener("input", e=>{ const t=e.target; if(t.dataset.k && t.dataset.d){ const ov = state.ov[t.dataset.d] = state.ov[t.dataset.d]||{}; ov[t.dataset.k] = Object.assign(ov[t.dataset.k]||{}, {q:num(t.value)}); save(); refreshNumbers(); } });
+R.addEventListener("input", e=>{ const t=e.target; if(t.dataset.k && t.dataset.d){ const ov = state.ov[t.dataset.d] = state.ov[t.dataset.d]||{}; ov[t.dataset.k] = Object.assign(ov[t.dataset.k]||{}, {q: t.dataset.fx==="1" ? num(t.value) : num(t.value)*BASE/RB()}); save(); refreshNumbers(); } });
 R.addEventListener("change", e=>{ const t=e.target;
   if(t.dataset.dwho){ const id=personByName(t.value); if(id) state.who["dish:"+t.dataset.dwho]=id; else delete state.who["dish:"+t.dataset.dwho]; save(); renderAll(); }
   if(t.dataset.hora){ state.enc[t.dataset.hora].hora=t.value; save(); renderAll(); }
@@ -1596,7 +1599,7 @@ R.addEventListener("click", e=>{
   const ov = state.ov[d] = state.ov[d]||{}; ov[k] = Object.assign(ov[k]||{}, {off: b.dataset.act==="off"}); save(); renderAll();
 });
 R.addEventListener("submit", e=>{ e.preventDefault(); const fm=e.target, d=fm.dataset.d;
-  const n=document.getElementById("add-n-"+d).value.trim(), q=num(document.getElementById("add-q-"+d).value), u=document.getElementById("add-u-"+d).value;
+  const n=document.getElementById("add-n-"+d).value.trim(), q=num(document.getElementById("add-q-"+d).value)*BASE/RB(), u=document.getElementById("add-u-"+d).value;
   if(!n) return; (state.custom[d]=state.custom[d]||[]).push({k:"c_"+Date.now().toString(36), n, q, u, s:"Otros"}); save(); renderAll(); flash(n+" añadido a la lista"); });
 
 document.getElementById("drinks").addEventListener("change", e=>{ const t=e.target; if(t.dataset.dk){ state.drinks[t.dataset.dk].on=t.checked; save(); refreshNumbers(); } });
