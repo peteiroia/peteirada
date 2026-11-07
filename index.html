@@ -17,7 +17,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>window.PETEIRADA_FIREBASE = {"apiKey":"AIzaSyC4NSC0OmccfTWYhtx0CA1hTLd-nA58FU4","authDomain":"peteirada.firebaseapp.com","projectId":"peteirada","storageBucket":"peteirada.firebasestorage.app","messagingSenderId":"69304947720","appId":"1:69304947720:web:69d54c0917199898cb2dbd"};</script>
-<script>(function(){ var BUILD="20261107105134";
+<script>(function(){ var BUILD="20261107105259";
   function check(){ try{ fetch("version.txt?t="+Date.now(),{cache:"no-store"}).then(function(r){ return r.ok?r.text():""; }).then(function(v){ v=(v||"").trim(); if(!v||v===BUILD) return; var u=new URL(location.href); if(u.searchParams.get("v")===v) return; u.searchParams.set("v",v); location.replace(u.toString()); }).catch(function(){}); }catch(e){} }
   check(); document.addEventListener("visibilitychange",function(){ if(document.visibilityState==="visible") check(); });
 })();</script>
@@ -1111,7 +1111,7 @@ const TASKS = [
  {id:"cafe",d:"2026-12-19",t:"Sobremesa",title:"Preparar el café de pota descafeinado",dish:"cafe"},
  {id:"queimada",d:"2026-12-19",t:"Sobremesa",title:"Queimada y conxuro",dish:"queimada"}
 ];
-const DEFAULT_VIDEOS = {huevos:"https://youtube.com/shorts/DTqcpBCSxhk", croissant:"https://youtube.com/shorts/bfxTcfU_-xc", hojaldre:"https://youtube.com/shorts/exZhUA5spTQ", chorizos:"https://youtube.com/shorts/mZlsV7bUdTM", caldeiro:"https://youtube.com/shorts/00YJFwrSce8", quesos:"https://youtube.com/shorts/FJOLBfS40XA", fruta:"https://youtube.com/shorts/V0QfQA9ARec"};
+const DEFAULT_VIDEOS = {huevos:"https://youtube.com/shorts/DTqcpBCSxhk", croissant:"https://youtube.com/shorts/bfxTcfU_-xc", hojaldre:"https://youtube.com/shorts/exZhUA5spTQ", chorizos:"https://youtube.com/shorts/mZlsV7bUdTM", caldeiro:"https://youtube.com/shorts/00YJFwrSce8", quesos:"https://youtube.com/shorts/FJOLBfS40XA", fruta:"https://youtube.com/shorts/V0QfQA9ARec", larpeira:"https://youtube.com/shorts/NLHTdjjd_1c"};
 const LS = "peteirada-2026-v3";
 const SHARED = ["videos","base","wineGoal","show","welcome","autoGuests","testUrl","rsvpManual","guests","sel","done","stock","ov","custom","fruits","drinks","menaje","people","who","enc","encDone","mob","eq","eqCustom","tasks","taskCustom","pinHash"];
 let state = {guests:50, sel:DISHES.map(d=>d.id), done:[], stock:{}, ov:{}, custom:{},
